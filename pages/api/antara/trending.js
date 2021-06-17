@@ -2,7 +2,7 @@ import cheerio from 'cheerio'
 import axios from 'axios'
 
 // Helper
-import { getListTitle, getInfo, getListThumb, getListCategory, getListTime } from '../../../helper/antara'
+import { getListTitle, getInfo, getListThumb, getListCategory, getDate } from '../../../helper/antara'
 
 export default async (req, res) => {
   if (req.method === 'GET') {
@@ -20,7 +20,7 @@ export default async (req, res) => {
           title: getListTitle(selector),
           thumbnail: getListThumb(selector),
           category: getListCategory(selector),
-          date: getListTime(selector),
+          date: getDate(selector),
           info: getInfo(selector),
         }
       })
