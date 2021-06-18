@@ -3,7 +3,7 @@ export const getListTitle = selector => {
 }
 
 export const getInfo = selector => {
-  const path = selector.find('article[class="simple-post simple-big clearfix"] > header > h3 > a').attr('href').replace('https://www.antaranews.com', '')
+  const path = selector.find('article > header > h3 > a').attr('href').replace('https://www.antaranews.com', '').split('?utm_source')[0]
   const tag = path.split('/')[1]
   const id = path.split('/')[2]
 
@@ -59,4 +59,20 @@ export const getArticleTags = ($, selector) => {
   })
 
   return tags
+}
+
+export const getRelatedArticles = $ => {
+  const wrapper = $('body').find('div[id="main"] > div[id="main-container"] > div[class="main-content mag-content clearfix"] > div[class="row blog-content"] > div[class="col-md-8"] > div[class="related-posts clearfix"] > div[class="row"] > div')
+
+  const articles = Array.from(wrapper).map(el => {
+    const data = $(el)
+    
+    return {
+      title: data.find('div[class="col-md-3"] > article > header > h3 > a').text(),
+      thumbnail: data.find('div[class="col-md-3"] > article > a > picture > img').attr('data-src'),
+      info: getInfo(data)
+    }
+  })
+
+  return articles
 }
