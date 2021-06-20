@@ -1,52 +1,44 @@
+import axios from 'axios'
 import Head from 'next/head'
+
+// Components
+import Article from '../components/article'
+
 import styles from '../styles/Home.module.css'
 
-export default function Home() {
+export const getServerSideProps = async ({ req, query }) => {
+  const { host } = req.headers
+  const { page = 1 } = query
+  const protocol = req.headers['x-forwarded-proto'] || 'http'
+  const recents = await axios.get(`${protocol}://${host}/api/antara/recent?page=${page}`)
+  const trending = await axios.get(`${protocol}://${host}/api/antara/trending?page=${page}`)
+
+  return {
+    props: {
+      recents: recents.data,
+      trending: trending.data,
+    }
+  }
+}
+
+export default function Home(props) {
+  const { recents, trending } = props
+  console.log(recents)
+
   return (
-    <div className={styles.container}>
+    <div className="bg-white">
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Bray News</title>
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+      <main className="md:grid md:grid-cols-10">
+        <div className="md:col-span-6 md:col-start-1 p-5">
+          <h3 className="font-bold text-xl border-l-4 border-red-500 pl-2 py-2 mb-3">Berita Terkini</h3>
+          {recents?.data?.map((item, index) => <Article key={index} data={item} type='main' />)}
+        </div>
+        <div className="md:col-span-4 md:col-start-7 p-5">
+          <h3 className="font-bold text-xl border-l-4 border-red-500 bg-gray-100 py-2 pl-2 mb-3">#Trending</h3>
+          {trending?.data?.map((item, index) => <Article key={index} data={item} type='sidebar' />)}
         </div>
       </main>
 
