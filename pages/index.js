@@ -2,6 +2,7 @@ import axios from 'axios'
 import Head from 'next/head'
 
 // Components
+import Container from '../components/container'
 import Article from '../components/article'
 import Footer from '../components/footer'
 
@@ -49,22 +50,26 @@ export default function Home(props) {
         <title>Bray News</title>
       </Head>
 
-      <main className="md:grid md:grid-cols-10">
-        <div className="md:col-span-6 md:col-start-1 p-5">
-          <h3 className="font-bold text-xl border-l-4 border-red-500 pl-2 py-2 mb-3">Berita Terkini</h3>
-          {recents?.data?.map((item, index) => <Article key={index} data={item} type='main' />)}
-          <div className="flex flex-row justify-center items-center mt-10">
-            {_prevPage()}
-            <span className="font-regular mx-2 text-black">{recents?.response?.page}</span>
-            {_nextPage()}
-          </div>
-        </div>
-        <div className="md:col-span-4 md:col-start-7 p-5">
-          <h3 className="font-bold text-xl border-l-4 border-red-500 bg-gray-100 py-2 pl-2 mb-3">#Trending</h3>
-          {trending?.data?.map((item, index) => <Article key={index} data={item} type='sidebar' />)}
-        </div>
-      </main>
-
+      <Container
+        main={(
+          <>
+            <h3 className="font-bold text-xl border-l-4 border-red-500 pl-2 py-2 mb-3">Berita Terkini</h3>
+            {recents?.data?.map((item, index) => <Article key={index} data={item} type='main' />)}
+            <div className="flex flex-row justify-center items-center mt-10">
+              {_prevPage()}
+              <span className="font-regular mx-2 text-black">{recents?.response?.page}</span>
+              {_nextPage()}
+            </div>
+          </>
+        )}
+        sidebar={(
+          <>
+            <h3 className="font-bold text-xl border-l-4 border-red-500 bg-gray-100 py-2 pl-2 mb-3">#Trending</h3>
+            {trending?.data?.map((item, index) => <Article key={index} data={item} type='sidebar' />)}
+          </>
+        )}
+      />
+      
       <Footer />
     </div>
   )
