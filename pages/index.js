@@ -6,17 +6,27 @@ import Container from '../components/container'
 import Article from '../components/article'
 import Footer from '../components/footer'
 
-export const getServerSideProps = async ({ req, query }) => {
+export const getServerSideProps = async ({ req, query, res }) => {
   const { host } = req.headers
   const { page = 1 } = query
   const protocol = req.headers['x-forwarded-proto'] || 'http'
-  const recents = await axios.get(`${protocol}://${host}/api/antara/recent?page=${page}`)
-  const trending = await axios.get(`${protocol}://${host}/api/antara/trending?page=${page}`)
 
-  return {
-    props: {
-      recents: recents.data,
-      trending: trending.data,
+  try {
+    const recents = await axios.get(`${protocol}://${host}/api/antara/recent?page=${page}`)
+    const trending = await axios.get(`${protocol}://${host}/api/antara/trending?page=${page}`)
+
+    return {
+      props: {
+        recents: recents.data,
+        trending: trending.data,
+      }
+    }
+  }
+  catch {
+    res.statusCode = 302
+    res.setHeader('Location', '/404')
+    return {
+      props: {}
     }
   }
 }
@@ -69,7 +79,7 @@ export default function Home(props) {
           </>
         )}
       />
-      
+
       <Footer />
     </div>
   )
