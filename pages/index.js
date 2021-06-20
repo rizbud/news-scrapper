@@ -1,65 +1,86 @@
+import axios from 'axios'
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
 
-export default function Home() {
+// Components
+import Container from '../components/container'
+import Article from '../components/article'
+import Footer from '../components/footer'
+
+export const getServerSideProps = async ({ req, query, res }) => {
+  const { host } = req.headers
+  const { page = 1 } = query
+  const protocol = req.headers['x-forwarded-proto'] || 'http'
+
+  try {
+    const recents = await axios.get(`${protocol}://${host}/api/antara/recent?page=${page}`)
+    const trending = await axios.get(`${protocol}://${host}/api/antara/trending?page=${page}`)
+
+    return {
+      props: {
+        recents: recents.data,
+        trending: trending.data,
+      }
+    }
+  }
+  catch {
+    res.statusCode = 302
+    res.setHeader('Location', '/404')
+    return {
+      props: {}
+    }
+  }
+}
+
+export default function Home(props) {
+  const { recents, trending } = props
+
+  const _nextPage = () => {
+    const { page, lastPage } = recents?.response
+
+    return page < lastPage && (
+      <a href={`?page=${page + 1}`} className="mx-1">
+        <span className="bg-white border border-gray-300 p-2">»</span>
+      </a>
+    )
+  }
+
+  const _prevPage = () => {
+    const { page, lastPage } = recents?.response
+
+    return page > 1 && (
+      <a href={`?page=${page - 1}`} className="mx-1">
+        <span className="bg-white border border-gray-300 p-2">«</span>
+      </a>
+    )
+  }
+
   return (
-    <div className={styles.container}>
+    <div className="bg-white">
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Bray News</title>
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+      <Container
+        main={(
+          <>
+            <h3 className="font-bold text-xl border-l-4 border-red-500 pl-2 py-2 mb-3">Berita Terkini</h3>
+            {recents?.data?.map((item, index) => <Article key={index} data={item} type='main' />)}
+            <div className="flex flex-row justify-center items-center mt-10">
+              {_prevPage()}
+              <span className="font-regular mx-2 text-black">{recents?.response?.page}</span>
+              {_nextPage()}
+            </div>
+          </>
+        )}
+        sidebar={(
+          <>
+            <h3 className="font-bold text-xl border-l-4 border-red-500 bg-gray-100 py-2 pl-2 mb-3">#Trending</h3>
+            {trending?.data?.map((item, index) => <Article key={index} data={item} type='sidebar' />)}
+          </>
+        )}
+      />
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+      <Footer />
     </div>
   )
 }

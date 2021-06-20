@@ -3,6 +3,7 @@ import axios from 'axios'
 
 // Helper
 import {
+  getRelatedArticles,
   getArticleDetail,
   getArticleTitle,
   getArticleThumb,
@@ -30,7 +31,8 @@ export default async (req, res) => {
             thumbnail: getArticleThumb(article),
             date: getDate(article),
             detail: getArticleDetail(article),
-            tags: getArticleTags($, article)
+            tags: getArticleTags($, article),
+            related_articles: getRelatedArticles($),
           }
         })
       }
